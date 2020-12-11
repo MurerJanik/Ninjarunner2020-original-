@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
 
     private bool attack;
 
+    private bool slide;
+
     private bool facingRight;
 
     // Start is called before the first frame update
@@ -24,6 +26,11 @@ public class Player : MonoBehaviour
         myAnimator = GetComponent<Animator>();
     }
 
+    private void Update()
+    {
+        HandleInput();
+    }
+
     // Update is called once per frame
     void  FixedUpdate()
     {
@@ -32,20 +39,52 @@ public class Player : MonoBehaviour
         HandleMovement(horizontal);
 
         Flip(horizontal);
+
+        HandleAttacks();
+
+        ResetValues();
     }
 
     private void HandleMovement(float horizontal)
     {
-        myRigidbody.velocity = new Vector2(horizontal * movementSpeed, myRigidbody.velocity.y);
+
+        if (!myAnimator.GetBool("slide") && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
+        {
+            myRigidbody.velocity = new Vector2(horizontal * movementSpeed, myRigidbody.velocity.y);
+        }
+
+        if (slide && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Slide"))
+        {
+            myAnimator.SetBool("slide", true);
+        }
+        else if (!this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Slide"))
+        {
+            myAnimator.SetBool("slide", false);
+        }
+
 
         myAnimator.SetFloat("speed", Mathf.Abs( horizontal));
     }
 
     private void HandleAttacks()
     {
-        if (attack)
+        if (attack && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack"))
         {
             myAnimator.SetTrigger("attack");
+            myRigidbody.velocity = Vector2.zero;
+        }
+    }
+
+    private void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.LeftShift))
+        {
+            attack = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            slide = true;
         }
     }
 
@@ -61,5 +100,11 @@ public class Player : MonoBehaviour
 
             transform.localScale = theScale;
         }
+    }
+
+    private void ResetValues()
+    {
+        attack = false;
+        slide = false;
     }
 }
