@@ -64,11 +64,18 @@ public class Player : MonoBehaviour
 
         HandleAttacks();
 
+        HandleLayers();
+
         ResetValues();
     }
 
     private void HandleMovement(float horizontal)
     {
+
+        if (myRigidbody.velocity.y < 0)
+        {
+            myAnimator.SetBool("land", true);
+        }
 
         if (!myAnimator.GetBool("slide") && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsTag("Attack")&& (isGrounded || airControl))
         {
@@ -79,6 +86,7 @@ public class Player : MonoBehaviour
         {
             isGrounded = false;
             myRigidbody.AddForce(new Vector2(0, jumpForce));
+            myAnimator.SetTrigger("jump");
         }
 
         if (slide && !this.myAnimator.GetCurrentAnimatorStateInfo(0).IsName("Slide"))
@@ -154,11 +162,24 @@ public class Player : MonoBehaviour
                 {
                     if (colliders[i].gameObject != gameObject)
                     {
+                        myAnimator.ResetTrigger("jump");
+                        myAnimator.SetBool("land", false);
                         return true;
                     }
                 }
             }
         }
         return false;
+    }
+    private void HandleLayers()
+    {
+        if (!isGrounded)
+        {
+            myAnimator.SetLayerWeight(1, 1);
+        }
+        else
+        {
+            myAnimator.SetLayerWeight(1, 0);
+        }
     }
 }
